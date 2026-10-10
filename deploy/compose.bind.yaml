@@ -1,0 +1,19 @@
+services:
+  starwave:
+    environment:
+      CACHE_DIR: /models
+      XDG_CACHE_HOME: /models
+      HF_HOME: /models/huggingface
+      HOST_DATA_DIR: ${HOST_DATA_DIR:?Set HOST_DATA_DIR to an existing absolute data directory}
+      HOST_MODEL_CACHE_DIR: ${HOST_MODEL_CACHE_DIR:?Set HOST_MODEL_CACHE_DIR to an existing absolute model cache directory}
+    volumes:
+      - type: bind
+        source: ${HOST_DATA_DIR:?Set HOST_DATA_DIR to an existing absolute data directory}
+        target: /data
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${HOST_MODEL_CACHE_DIR:?Set HOST_MODEL_CACHE_DIR to an existing absolute model cache directory}
+        target: /models
+        bind:
+          create_host_path: false

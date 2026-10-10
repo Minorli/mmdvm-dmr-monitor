@@ -1,0 +1,49 @@
+name: Check
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9 # v7
+        with:
+          version: "0.12.24"
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: ./scripts/check.sh
+
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9 # v7
+        with:
+          version: "0.12.24"
+          python-version: "3.12"
+      - run: docker compose --env-file /dev/null config --quiet
+      - run: docker build --tag starwave:ci .
+      - run: uv sync --locked
+      - run: uv run --frozen pytest tests/test_container_image.py tests/test_connection_ssh_integration.py -q
+        env:
+          STARWAVE_CONTAINER_IMAGE: starwave:ci
+          STARWAVE_CONNECTION_IMAGE: starwave:ci

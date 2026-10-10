@@ -1,0 +1,14 @@
+services:
+  starwave:
+    environment:
+      SSH_KEY_FILE: /run/secrets/pi_ssh_key
+      SSH_KNOWN_HOSTS_FILE: /run/secrets/pi_known_hosts
+    secrets:
+      - pi_ssh_key
+      - pi_known_hosts
+
+secrets:
+  pi_ssh_key:
+    file: ${SSH_KEY_PATH:-./secrets/pi_ssh_key}
+  pi_known_hosts:
+    file: ${SSH_KNOWN_HOSTS_PATH:-./secrets/known_hosts}

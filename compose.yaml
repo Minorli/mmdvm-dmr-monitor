@@ -1,0 +1,72 @@
+name: starwave
+
+services:
+  starwave:
+    image: ${STARWAVE_IMAGE:-starwave:local}
+    build:
+      context: .
+      args:
+        APP_UID: ${APP_UID:-1000}
+        APP_GID: ${APP_GID:-1000}
+    user: "${APP_UID:-1000}:${APP_GID:-1000}"
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 60s
+    ports:
+      - "${HOST_BIND:-127.0.0.1}:${PORT:-8788}:8788"
+    environment:
+      DATA_DIR: /data
+      CACHE_DIR: /models/cache
+      BIND_HOST: 0.0.0.0
+      PORT: "8788"
+      FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-127.0.0.1}
+      PI_STAR_HOST: ${PI_STAR_HOST:-}
+      DEVICE_NAME: ${DEVICE_NAME:-Pi-Star}
+      SSH_PORT: ${SSH_PORT:-22}
+      REQUIRE_EXPLICIT_SSH: "true"
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      TRANSLATION_MODEL: ${TRANSLATION_MODEL:-gpt-4.1-mini}
+      WHISPER_MODEL: ${WHISPER_MODEL:-small}
+      WHISPER_DEVICE: ${WHISPER_DEVICE:-cpu}
+      WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-int8}
+      WHISPER_THREADS: ${WHISPER_THREADS:-2}
+      TRANSCRIPTION_WORKERS: ${TRANSCRIPTION_WORKERS:-2}
+      TRANSLATION_WORKERS: ${TRANSLATION_WORKERS:-2}
+      TRANSLATION_API: ${TRANSLATION_API:-responses}
+      TRANSLATION_ENABLED: ${TRANSLATION_ENABLED:-true}
+      RECORDING_TIMEZONE: ${RECORDING_TIMEZONE:-Asia/Shanghai}
+      AUDIO_RETENTION_DAYS: ${AUDIO_RETENTION_DAYS:-0}
+      REQUEST_TIMEOUT_SECONDS: ${REQUEST_TIMEOUT_SECONDS:-60}
+      RETRY_ATTEMPTS: ${RETRY_ATTEMPTS:-4}
+      RETRY_BASE_SECONDS: ${RETRY_BASE_SECONDS:-5}
+      JOB_LEASE_SECONDS: ${JOB_LEASE_SECONDS:-300}
+      LIVE_JOB_AGE_SECONDS: ${LIVE_JOB_AGE_SECONDS:-300}
+      CAPTURE_TIMEOUT_SECONDS: ${CAPTURE_TIMEOUT_SECONDS:-20}
+      RECONNECT_SECONDS: ${RECONNECT_SECONDS:-5}
+      MAX_SEGMENT_SECONDS: ${MAX_SEGMENT_SECONDS:-20}
+      MIN_CALL_SECONDS: ${MIN_CALL_SECONDS:-1}
+      CONTROL_TOKEN: ${CONTROL_TOKEN:-}
+    volumes:
+      - recordings:/data
+      - models:/models
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,noexec,size=128m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    cpus: ${APP_CPUS:-4.0}
+    mem_limit: ${APP_MEMORY:-4g}
+    mem_reservation: 1g
+    pids_limit: 256
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  recordings:
+  models:

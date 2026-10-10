@@ -1,0 +1,11 @@
+services:
+  starwave:
+    environment:
+      CONTROL_TOKEN: ""
+      CONTROL_TOKEN_FILE: /run/secrets/control_token
+    secrets:
+      - control_token
+
+secrets:
+  control_token:
+    file: ${CONTROL_TOKEN_PATH:?Set CONTROL_TOKEN_PATH to the control token file}

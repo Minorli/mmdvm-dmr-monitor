@@ -1,0 +1,11 @@
+services:
+  starwave:
+    environment:
+      OPENAI_API_KEY: ""
+      OPENAI_API_KEY_FILE: /run/secrets/openai_api_key
+    secrets:
+      - openai_api_key
+
+secrets:
+  openai_api_key:
+    file: ${OPENAI_API_KEY_PATH:?Set OPENAI_API_KEY_PATH to the API key file}
